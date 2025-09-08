@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+
 import { ConfigModule } from '@nestjs/config';
 import spotifyConfig from './spotify.config';
+import { Module } from '@nestjs/common/decorators/modules';
 
 @Module({
   imports: [
@@ -10,4 +11,4 @@ import spotifyConfig from './spotify.config';
     }),
   ],
 })
-export class AppConfigModule {}
+export class AppConfigModule { }
