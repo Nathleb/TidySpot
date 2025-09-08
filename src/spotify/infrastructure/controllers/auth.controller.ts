@@ -50,15 +50,16 @@ export class AuthController {
     } catch (error) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         error: 'Authentication failed',
-        message: error.message,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        message: error?.message,
       });
     }
   }
 
-  @Get('me')
-  async getProfile() {
-    // This endpoint would be protected by an auth guard
-    // and return the current user's profile
-    return { message: 'This endpoint needs auth guard implementation' };
-  }
+  // @Get('me')
+  // async getProfile() {
+  //   // This endpoint would be protected by an auth guard
+  //   // and return the current user's profile
+  //   return { message: 'This endpoint needs auth guard implementation' };
+  // }
 }

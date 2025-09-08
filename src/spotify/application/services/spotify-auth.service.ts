@@ -19,6 +19,8 @@ export class SpotifyAuthService {
       'spotify.redirectUri',
     );
     const scopes = this.configService.getOrThrow<string>('spotify.scopes');
+    const accountbaseUri =
+      this.configService.getOrThrow<string>('spotify.accountUrl');
 
     const params = new URLSearchParams({
       response_type: 'code',
@@ -28,13 +30,15 @@ export class SpotifyAuthService {
       state: this.generateState(),
     });
 
-    return `https://accounts.spotify.com/authorize?${params.toString()}`;
+    return `${accountbaseUri}/authorize?${params.toString()}`;
   }
 
   async handleCallback(code: string, state: string): Promise<User> {
     // Verify state for CSRF protection
     // In production, you'd want to store and validate the state properly
-
+    if (state == null) {
+      throw new Error('state mismatch');
+    }
     try {
       const tokens = await this.spotifyClient.exchangeCodeForTokens(code);
 
@@ -45,7 +49,7 @@ export class SpotifyAuthService {
       const expiresAt = new Date(Date.now() + tokens.expiresIn * 1000);
       const user = new User(
         profile.id,
-        profile.display_name,
+        profile.displayName,
         profile.email,
         tokens.accessToken,
         tokens.refreshToken,
