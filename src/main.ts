@@ -9,6 +9,6 @@ async function bootstrap() {
     cert: fs.readFileSync('./certificates/localhost+1.pem'),
   };
   const app = await NestFactory.create(AppModule, { httpsOptions });
-  await app.listen(3000);
+  await app.listen(3000, '0.0.0.0');
 }
 bootstrap();

@@ -55,7 +55,7 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
     try {
       const response: AxiosResponse<SpotifyResponseToken> =
         await firstValueFrom(
-          this.httpService.post(`${this.accountUrl}/token`, params.toString(), {
+          this.httpService.post(`${this.accountUrl}/api/token`, params.toString(), {
             headers: {
               Authorization: `Basic ${authHeader}`,
               'Content-Type': 'application/x-www-form-urlencoded',
@@ -90,7 +90,7 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
     try {
       const response = await firstValueFrom(
         this.httpService.post<SpotifyResponseToken>(
-          `${this.accountUrl}/token`,
+          `${this.accountUrl}/api/token`,
           params.toString(),
           {
             headers: {
