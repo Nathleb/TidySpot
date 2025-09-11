@@ -1,4 +1,3 @@
-
 import { AuthController } from './infrastructure/controllers/auth.controller';
 import { SpotifyApiAdapter } from './infrastructure/adapters/spotify-api.adapter';
 import { SpotifyAuthService } from './application/services/spotify-auth.service';
@@ -13,12 +12,16 @@ import { AppConfigModule } from 'src/config/config.module';
 @Module({
   imports: [HttpModule, ConfigModule, AppConfigModule],
   controllers: [AuthController],
-  providers: [SpotifyAuthService, {
-    provide: SpotifyClientPort,
-    useClass: SpotifyApiAdapter,
-  }, {
+  providers: [
+    SpotifyAuthService,
+    {
+      provide: SpotifyClientPort,
+      useClass: SpotifyApiAdapter,
+    },
+    {
       provide: UserRepositoryPort,
-      useClass: UserRepository
-    }],
+      useClass: UserRepository,
+    },
+  ],
 })
-export class SpotifyModule { }
+export class SpotifyModule {}

@@ -1,4 +1,3 @@
-// src/spotify/infrastructure/adapters/spotify-api.adapter.ts
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
@@ -10,6 +9,7 @@ import {
 } from '../../domain/ports/spotify-client.port';
 import { AxiosResponse } from 'axios';
 import { Track } from 'src/spotify/domain/entities/track.entity';
+import { Playlist } from 'src/spotify/domain/entities/playlist.entity';
 
 interface SpotifyResponseToken {
   access_token: string;
@@ -55,12 +55,16 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
     try {
       const response: AxiosResponse<SpotifyResponseToken> =
         await firstValueFrom(
-          this.httpService.post(`${this.accountUrl}/api/token`, params.toString(), {
-            headers: {
-              Authorization: `Basic ${authHeader}`,
-              'Content-Type': 'application/x-www-form-urlencoded',
+          this.httpService.post(
+            `${this.accountUrl}/api/token`,
+            params.toString(),
+            {
+              headers: {
+                Authorization: `Basic ${authHeader}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
             },
-          }),
+          ),
         );
 
       return {
@@ -179,6 +183,114 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
       console.error(error);
       throw new HttpException(
         'Failed to get liked tracks',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getUserPlaylists(accessToken: string): Promise<Playlist[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<SpotifyApi.ListOfCurrentUsersPlaylistsResponse>(
+          `${this.apiUrl}/me/playlists`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        ),
+      );
+
+      return response.data.items.map(
+        (playlist: SpotifyApi.PlaylistObjectSimplified) => {
+          return new Playlist(
+            playlist.id,
+            playlist.name,
+            playlist.description || '',
+            playlist.tracks.total,
+            playlist.owner.display_name || '',
+            playlist.external_urls.spotify,
+            playlist.images[0]?.url || '',
+          );
+        },
+      );
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to get user playlists',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async createPlaylist(
+    accessToken: string,
+    userId: string,
+    name: string,
+    description = '',
+  ): Promise<Playlist> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<SpotifyApi.CreatePlaylistResponse>(
+          `${this.apiUrl}/users/${userId}/playlists`,
+          {
+            name,
+            description,
+            public: false, // Creating a private playlist by default
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+
+      const playlist = response.data;
+      return new Playlist(
+        playlist.id,
+        playlist.name,
+        playlist.description || '',
+        playlist.tracks.total,
+        playlist.owner.display_name || '',
+        playlist.external_urls.spotify,
+        playlist.images[0]?.url || '',
+      );
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to create playlist',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async addTracksToPlaylist(
+    accessToken: string,
+    playlistId: string,
+    trackIds: string[],
+  ): Promise<void> {
+    try {
+      const uris = trackIds.map((id) => `spotify:track:${id}`);
+      await firstValueFrom(
+        this.httpService.post(
+          `${this.apiUrl}/playlists/${playlistId}/tracks`,
+          {
+            uris,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to add tracks to playlist',
         HttpStatus.BAD_REQUEST,
       );
     }

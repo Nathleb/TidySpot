@@ -11,7 +11,7 @@ export class SpotifyAuthService {
     private readonly spotifyClient: SpotifyClientPort,
     private readonly userRepository: UserRepositoryPort,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   getAuthUrl(): string {
     const clientId = this.configService.getOrThrow<string>('spotify.clientId');

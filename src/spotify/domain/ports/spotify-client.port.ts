@@ -1,3 +1,4 @@
+import { Playlist } from '../entities/playlist.entity';
 import { Track } from '../entities/track.entity';
 
 export interface SpotifyTokens {
@@ -22,16 +23,16 @@ export abstract class SpotifyClientPort {
     limit?: number,
     offset?: number,
   ): Promise<Track[]>;
-  // abstract getUserPlaylists(accessToken: string): Promise<Playlist[]>;
-  // abstract createPlaylist(
-  //   accessToken: string,
-  //   userId: string,
-  //   name: string,
-  //   description?: string,
-  // ): Promise<Playlist>;
-  // abstract addTracksToPlaylist(
-  //   accessToken: string,
-  //   playlistId: string,
-  //   trackIds: string[],
-  // ): Promise<void>;
+  abstract getUserPlaylists(accessToken: string): Promise<Playlist[]>;
+  abstract createPlaylist(
+    accessToken: string,
+    userId: string,
+    name: string,
+    description?: string,
+  ): Promise<Playlist>;
+  abstract addTracksToPlaylist(
+    accessToken: string,
+    playlistId: string,
+    trackIds: string[],
+  ): Promise<void>;
 }

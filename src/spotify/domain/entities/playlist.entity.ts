@@ -3,7 +3,6 @@ export class Playlist {
     public readonly id: string,
     public readonly name: string,
     public readonly description: string,
-    public readonly isPublic: boolean,
     public readonly trackCount: number,
     public readonly ownerDisplayName: string,
     public readonly externalUrl: string,
