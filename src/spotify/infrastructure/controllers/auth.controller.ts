@@ -8,8 +8,8 @@ export class AuthController {
   constructor(private readonly spotifyAuthService: SpotifyAuthService) {}
 
   @Get('login')
-  login(@Res() res: Response) {
-    const authUrl = this.spotifyAuthService.getAuthUrl();
+  async login(@Res() res: Response) {
+    const authUrl = await this.spotifyAuthService.getAuthUrl();
     return res.redirect(authUrl);
   }
 

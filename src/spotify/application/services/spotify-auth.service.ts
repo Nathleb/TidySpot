@@ -16,7 +16,7 @@ export class SpotifyAuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  getAuthUrl(): string {
+  async getAuthUrl(): Promise<string> {
     const clientId = this.configService.getOrThrow<string>('spotify.clientId');
     const redirectUri = this.configService.getOrThrow<string>(
       'spotify.redirectUri',
@@ -26,7 +26,7 @@ export class SpotifyAuthService {
       this.configService.getOrThrow<string>('spotify.accountUrl');
 
     const codeVerifier = this.generateRandomString(64);
-    const hashed = this.sha256(codeVerifier);
+    const hashed = await this.sha256(codeVerifier);
     const codeChallenge = this.base64encode(hashed);
     window.localStorage.setItem('code_verifier', codeVerifier);
 
@@ -129,20 +129,21 @@ export class SpotifyAuthService {
     return crypto.randomBytes(16).toString('hex');
   }
 
-  private generateRandomString = (length) => {
+  //***** Spotify documentation for code challenge *****/
+  private generateRandomString = (length: number) => {
     const possible =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
     return values.reduce((acc, x) => acc + possible[x % possible.length], '');
   };
 
-  private sha256 = async (plain) => {
+  private sha256 = async (plain: string) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(plain);
     return window.crypto.subtle.digest('SHA-256', data);
   };
 
-  private base64encode = (input) => {
+  private base64encode = (input: ArrayBuffer) => {
     return btoa(String.fromCharCode(...new Uint8Array(input)))
       .replace(/=/g, '')
       .replace(/\+/g, '-')
