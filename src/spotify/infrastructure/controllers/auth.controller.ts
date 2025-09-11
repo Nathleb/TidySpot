@@ -5,7 +5,7 @@ import { SpotifyAuthService } from '../../application/services/spotify-auth.serv
 
 @Controller('auth/spotify')
 export class AuthController {
-  constructor(private readonly spotifyAuthService: SpotifyAuthService) { }
+  constructor(private readonly spotifyAuthService: SpotifyAuthService) {}
 
   @Get('login')
   login(@Res() res: Response) {

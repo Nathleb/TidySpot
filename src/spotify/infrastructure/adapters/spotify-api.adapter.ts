@@ -43,15 +43,20 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
   }
 
   async exchangeCodeForTokens(code: string): Promise<SpotifyTokens> {
+    const codeVerifier = localStorage.getItem('code_verifier') || '';
+
     const params = new URLSearchParams({
+      client_id: this.clientId,
       grant_type: 'authorization_code',
       code,
       redirect_uri: this.redirectUri,
+      code_verifier: codeVerifier,
     });
 
     const authHeader = Buffer.from(
       `${this.clientId}:${this.clientSecret}`,
     ).toString('base64');
+
     try {
       const response: AxiosResponse<SpotifyResponseToken> =
         await firstValueFrom(
@@ -85,6 +90,7 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
     const params = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
+      client_id: this.clientId,
     });
 
     const authHeader = Buffer.from(
@@ -236,7 +242,7 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
           {
             name,
             description,
-            public: false, // Creating a private playlist by default
+            public: false,
           },
           {
             headers: {

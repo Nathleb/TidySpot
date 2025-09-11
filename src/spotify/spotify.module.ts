@@ -8,6 +8,8 @@ import { SpotifyClientPort } from './domain/ports/spotify-client.port';
 import { UserRepositoryPort } from './domain/ports/user-repository.port';
 import { UserRepository } from './infrastructure/adapters/user.repository';
 import { AppConfigModule } from 'src/config/config.module';
+import { SpotifyAuthSessionRepositoryPort } from './domain/ports/spotify-auth-session-repository.port';
+import { SpotifyAuthSessionRepository } from './infrastructure/adapters/spotify-auth-session.repository';
 
 @Module({
   imports: [HttpModule, ConfigModule, AppConfigModule],
@@ -21,6 +23,10 @@ import { AppConfigModule } from 'src/config/config.module';
     {
       provide: UserRepositoryPort,
       useClass: UserRepository,
+    },
+    {
+      provide: SpotifyAuthSessionRepositoryPort,
+      useClass: SpotifyAuthSessionRepository,
     },
   ],
 })
