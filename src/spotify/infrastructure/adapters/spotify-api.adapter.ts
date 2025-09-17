@@ -42,9 +42,10 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
     );
   }
 
-  async exchangeCodeForTokens(code: string): Promise<SpotifyTokens> {
-    const codeVerifier = localStorage.getItem('code_verifier') || '';
-
+  async exchangeCodeForTokens(
+    code: string,
+    codeVerifier: string,
+  ): Promise<SpotifyTokens> {
     const params = new URLSearchParams({
       client_id: this.clientId,
       grant_type: 'authorization_code',

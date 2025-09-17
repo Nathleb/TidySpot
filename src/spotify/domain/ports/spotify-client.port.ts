@@ -15,7 +15,10 @@ export interface SpotifyUserProfile {
 }
 
 export abstract class SpotifyClientPort {
-  abstract exchangeCodeForTokens(code: string): Promise<SpotifyTokens>;
+  abstract exchangeCodeForTokens(
+    code: string,
+    codeVerifier: string,
+  ): Promise<SpotifyTokens>;
   abstract refreshTokens(refreshToken: string): Promise<SpotifyTokens>;
   abstract getUserProfile(accessToken: string): Promise<SpotifyUserProfile>;
   abstract getLikedTracks(

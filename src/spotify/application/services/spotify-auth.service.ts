@@ -7,6 +7,11 @@ import * as crypto from 'crypto';
 import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotifyAuthSession';
 import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/spotify-auth-session-repository.port';
 
+export interface AuthUrlResponse {
+  url: string;
+  codeVerifier: string;
+  state: string;
+}
 @Injectable()
 export class SpotifyAuthService {
   constructor(
@@ -16,7 +21,7 @@ export class SpotifyAuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async getAuthUrl(): Promise<string> {
+  async getAuthUrl(): Promise<AuthUrlResponse> {
     const clientId = this.configService.getOrThrow<string>('spotify.clientId');
     const redirectUri = this.configService.getOrThrow<string>(
       'spotify.redirectUri',
@@ -28,27 +33,35 @@ export class SpotifyAuthService {
     const codeVerifier = this.generateRandomString(64);
     const hashed = await this.sha256(codeVerifier);
     const codeChallenge = this.base64encode(hashed);
-    window.localStorage.setItem('code_verifier', codeVerifier);
+    const state = this.generateState();
 
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: clientId,
       scope: scopes,
       redirect_uri: redirectUri,
-      state: this.generateState(),
+      state: state,
       code_challenge_method: 'S256',
       code_challenge: codeChallenge,
     });
 
-    return `${accountbaseUri}/authorize?${params.toString()}`;
+    return {
+      url: `${this.configService.get('spotify.accountUrl')}/authorize?${params.toString()}`,
+      codeVerifier,
+      state,
+    };
   }
 
-  async handleCallback(code: string, state: string): Promise<User> {
-    if (state == null) {
-      throw new UnauthorizedException('State mismatch');
+  async handleCallback(code: string, codeVerifier: string): Promise<User> {
+    if (!codeVerifier) {
+      throw new UnauthorizedException('Missing code verifier');
     }
+
     try {
-      const tokens = await this.spotifyClient.exchangeCodeForTokens(code);
+      const tokens = await this.spotifyClient.exchangeCodeForTokens(
+        code,
+        codeVerifier,
+      );
       const profile = await this.spotifyClient.getUserProfile(
         tokens.accessToken,
       );
@@ -140,7 +153,7 @@ export class SpotifyAuthService {
   private sha256 = async (plain: string) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(plain);
-    return window.crypto.subtle.digest('SHA-256', data);
+    return crypto.subtle.digest('SHA-256', data);
   };
 
   private base64encode = (input: ArrayBuffer) => {

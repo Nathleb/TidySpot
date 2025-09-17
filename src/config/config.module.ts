@@ -1,13 +1,14 @@
-import { ConfigModule } from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import spotifyConfig from './spotify.config';
-import { Module } from '@nestjs/common/decorators/modules';
+import sessionConfig from './session.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
+    NestConfigModule.forRoot({
+      load: [spotifyConfig, sessionConfig],
       isGlobal: true,
-      load: [spotifyConfig],
     }),
   ],
 })
-export class AppConfigModule {}
+export class ConfigModule {}

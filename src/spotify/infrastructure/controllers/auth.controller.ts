@@ -1,16 +1,25 @@
 // src/spotify/infrastructure/controllers/auth.controller.ts
-import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
-import type { Response } from 'express';
+import { Controller, Get, Query, Res, HttpStatus, Req } from '@nestjs/common';
+import type { Response, Request } from 'express';
 import { SpotifyAuthService } from '../../application/services/spotify-auth.service';
+import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/spotify-auth-session-repository.port';
 
 @Controller('auth/spotify')
 export class AuthController {
-  constructor(private readonly spotifyAuthService: SpotifyAuthService) {}
+  constructor(
+    private readonly spotifyAuthService: SpotifyAuthService,
+    private readonly sessionRepository: SpotifyAuthSessionRepositoryPort,
+  ) {}
 
   @Get('login')
-  async login(@Res() res: Response) {
-    const authUrl = await this.spotifyAuthService.getAuthUrl();
-    return res.redirect(authUrl);
+  async login(@Res() res: Response, @Req() req: Request) {
+    const { url, codeVerifier, state } =
+      await this.spotifyAuthService.getAuthUrl();
+
+    req.session.codeVerifier = codeVerifier;
+    req.session.state = state;
+
+    return res.redirect(url);
   }
 
   @Get('callback')
@@ -18,12 +27,20 @@ export class AuthController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Query('error') error: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     if (error) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Access denied',
         description: error,
+      });
+    }
+
+    // Verify state
+    if (!state || state !== req.session.state) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        error: 'Invalid state parameter',
       });
     }
 
@@ -34,10 +51,16 @@ export class AuthController {
     }
 
     try {
-      const user = await this.spotifyAuthService.handleCallback(code, state);
+      const user = await this.spotifyAuthService.handleCallback(
+        code,
+        req.session.codeVerifier!,
+      );
 
-      // In a real app, you'd create a JWT token here and set it as an httpOnly cookie
-      // For now, we'll just return user info
+      delete req.session.codeVerifier;
+      delete req.session.state;
+
+      req.session.userId = user.spotifyId;
+
       return res.json({
         success: true,
         user: {
