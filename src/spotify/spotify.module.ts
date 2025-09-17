@@ -11,7 +11,6 @@ import { AppConfigModule } from 'src/config/config.module';
 import { SpotifyAuthSessionRepositoryPort } from './domain/ports/spotify-auth-session-repository.port';
 import { SpotifyAuthSessionRepository } from './infrastructure/adapters/spotify-auth-session.repository';
 import { SessionMiddleware } from './infrastructure/middleware/session.middleware';
-import { SpotifyAuthGuard } from './presentation/guards/spotify-auth.guard';
 
 @Module({
   imports: [HttpModule, ConfigModule, AppConfigModule],
@@ -30,7 +29,6 @@ import { SpotifyAuthGuard } from './presentation/guards/spotify-auth.guard';
       provide: SpotifyAuthSessionRepositoryPort,
       useClass: SpotifyAuthSessionRepository,
     },
-    SpotifyAuthGuard,
   ],
 })
 export class SpotifyModule implements NestModule {

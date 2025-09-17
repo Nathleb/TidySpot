@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Get,
-  Query,
-  Res,
-  HttpStatus,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Query, Res, HttpStatus, Req } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { SpotifyAuthService } from '../../application/services/spotify-auth.service';
-import { SpotifyAuthGuard } from '../../presentation/guards/spotify-auth.guard';
 import { SpotifyClientPort } from '../../domain/ports/spotify-client.port';
 
 @Controller('auth/spotify')
@@ -86,19 +77,19 @@ export class AuthController {
     }
   }
 
-  @Get('me')
-  @UseGuards(SpotifyAuthGuard)
-  async getProfile(@Req() req: Request) {
-    const session = (req as any).spotifySession;
-    const profile = await this.spotifyClient.getUserProfile(
-      session.accessToken,
-    );
+  // @Get('me')
+  // @UseGuards(SpotifyAuthGuard)
+  // async getProfile(@Req() req: Request) {
+  //   const session = (req as any).spotifySession;
+  //   const profile = await this.spotifyClient.getUserProfile(
+  //     session.accessToken,
+  //   );
 
-    return {
-      id: profile.id,
-      displayName: profile.displayName,
-      email: profile.email,
-      profileImage: profile.images?.[0]?.url,
-    };
-  }
+  //   return {
+  //     id: profile.id,
+  //     displayName: profile.displayName,
+  //     email: profile.email,
+  //     profileImage: profile.images?.[0]?.url,
+  //   };
+  // }
 }
