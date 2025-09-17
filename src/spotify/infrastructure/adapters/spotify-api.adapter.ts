@@ -130,7 +130,7 @@ export class SpotifyApiAdapter extends SpotifyClientPort {
     try {
       const response = await firstValueFrom(
         this.httpService.get<SpotifyApi.CurrentUsersProfileResponse>(
-          `${this.apiUrl}/me`,
+          `${this.apiUrl}/v1/me`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

@@ -11,4 +11,4 @@ import sessionConfig from './session.config';
     }),
   ],
 })
-export class ConfigModule {}
+export class AppConfigModule {}

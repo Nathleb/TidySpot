@@ -7,12 +7,13 @@ import { ConfigModule } from '@nestjs/config';
 import { SpotifyClientPort } from './domain/ports/spotify-client.port';
 import { UserRepositoryPort } from './domain/ports/user-repository.port';
 import { UserRepository } from './infrastructure/adapters/user.repository';
+import { AppConfigModule } from 'src/config/config.module';
 import { SpotifyAuthSessionRepositoryPort } from './domain/ports/spotify-auth-session-repository.port';
 import { SpotifyAuthSessionRepository } from './infrastructure/adapters/spotify-auth-session.repository';
 import { SessionMiddleware } from './infrastructure/middleware/session.middleware';
 
 @Module({
-  imports: [HttpModule, ConfigModule],
+  imports: [HttpModule, ConfigModule, AppConfigModule],
   controllers: [AuthController],
   providers: [
     SpotifyAuthService,
@@ -32,6 +33,6 @@ import { SessionMiddleware } from './infrastructure/middleware/session.middlewar
 })
 export class SpotifyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(SessionMiddleware).forRoutes('auth/spotify'); // Apply to all routes under auth/spotify
+    consumer.apply(SessionMiddleware).forRoutes('auth/spotify');
   }
 }
