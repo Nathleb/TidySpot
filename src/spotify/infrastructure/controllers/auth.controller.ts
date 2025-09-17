@@ -1,14 +1,24 @@
-// src/spotify/infrastructure/controllers/auth.controller.ts
-import { Controller, Get, Query, Res, HttpStatus, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Res,
+  HttpStatus,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { SpotifyAuthService } from '../../application/services/spotify-auth.service';
 import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/spotify-auth-session-repository.port';
+import { SpotifyAuthGuard } from '../../presentation/guards/spotify-auth.guard';
+import { SpotifyClientPort } from '../../domain/ports/spotify-client.port';
 
 @Controller('auth/spotify')
 export class AuthController {
   constructor(
     private readonly spotifyAuthService: SpotifyAuthService,
     private readonly sessionRepository: SpotifyAuthSessionRepositoryPort,
+    private readonly spotifyClient: SpotifyClientPort,
   ) {}
 
   @Get('login')
@@ -37,7 +47,6 @@ export class AuthController {
       });
     }
 
-    // Verify state
     if (!state || state !== req.session.state) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Invalid state parameter',
@@ -59,7 +68,7 @@ export class AuthController {
       delete req.session.codeVerifier;
       delete req.session.state;
 
-      req.session.userId = user.spotifyId;
+      req.session.spotifyId = user.spotifyId;
 
       return res.json({
         success: true,
@@ -79,10 +88,19 @@ export class AuthController {
     }
   }
 
-  // @Get('me')
-  // async getProfile() {
-  //   // This endpoint would be protected by an auth guard
-  //   // and return the current user's profile
-  //   return { message: 'This endpoint needs auth guard implementation' };
-  // }
+  @Get('me')
+  @UseGuards(SpotifyAuthGuard)
+  async getProfile(@Req() req: Request) {
+    const session = (req as any).spotifySession;
+    const profile = await this.spotifyClient.getUserProfile(
+      session.accessToken,
+    );
+
+    return {
+      id: profile.id,
+      displayName: profile.displayName,
+      email: profile.email,
+      profileImage: profile.images?.[0]?.url,
+    };
+  }
 }

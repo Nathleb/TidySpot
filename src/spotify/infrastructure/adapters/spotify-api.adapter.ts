@@ -11,12 +11,6 @@ import { AxiosResponse } from 'axios';
 import { Track } from 'src/spotify/domain/entities/track.entity';
 import { Playlist } from 'src/spotify/domain/entities/playlist.entity';
 
-interface SpotifyResponseToken {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-}
-
 @Injectable()
 export class SpotifyApiAdapter extends SpotifyClientPort {
   private readonly accountUrl: string;

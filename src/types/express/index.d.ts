@@ -1,9 +1,10 @@
 declare namespace Express {
   interface Request {
     session: {
-      userId?: string;
+      spotifyId?: string;
       state?: string;
       codeVerifier?: string;
     };
+    spotifySession?: SpotifyAuthSession;
   }
 }

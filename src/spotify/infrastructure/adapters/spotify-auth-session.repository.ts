@@ -1,4 +1,3 @@
-// src/spotify/infrastructure/adapters/spotify-auth-session-repository.adapter.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotifyAuthSession';
 import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/spotify-auth-session-repository.port';
