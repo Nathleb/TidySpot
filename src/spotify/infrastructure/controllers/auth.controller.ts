@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { SpotifyAuthService } from '../../application/services/spotify-auth.service';
-import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/spotify-auth-session-repository.port';
 import { SpotifyAuthGuard } from '../../presentation/guards/spotify-auth.guard';
 import { SpotifyClientPort } from '../../domain/ports/spotify-client.port';
 
@@ -17,7 +16,6 @@ import { SpotifyClientPort } from '../../domain/ports/spotify-client.port';
 export class AuthController {
   constructor(
     private readonly spotifyAuthService: SpotifyAuthService,
-    private readonly sessionRepository: SpotifyAuthSessionRepositoryPort,
     private readonly spotifyClient: SpotifyClientPort,
   ) {}
 

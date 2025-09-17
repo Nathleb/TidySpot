@@ -10,6 +10,7 @@ import {
 import { AxiosResponse } from 'axios';
 import { Track } from 'src/spotify/domain/entities/track.entity';
 import { Playlist } from 'src/spotify/domain/entities/playlist.entity';
+import { SpotifyResponseToken } from './interfaces/SpotifyResponseToken';
 
 @Injectable()
 export class SpotifyApiAdapter extends SpotifyClientPort {
