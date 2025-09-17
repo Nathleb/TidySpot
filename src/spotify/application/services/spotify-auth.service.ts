@@ -51,7 +51,11 @@ export class SpotifyAuthService {
     };
   }
 
-  async handleCallback(code: string, codeVerifier: string): Promise<User> {
+  async handleCallback(
+    code: string,
+    codeVerifier: string,
+    sessionID: string,
+  ): Promise<User> {
     if (!codeVerifier) {
       throw new UnauthorizedException('Missing code verifier');
     }
@@ -70,7 +74,9 @@ export class SpotifyAuthService {
       this.userRepository.saveOrUpdate(user);
 
       const tokenExpiresAt = new Date(Date.now() + tokens.expiresIn * 1000);
+      console.log(sessionID);
       const session = new SpotifyAuthSession(
+        sessionID,
         profile.id,
         tokens.accessToken,
         tokens.refreshToken,

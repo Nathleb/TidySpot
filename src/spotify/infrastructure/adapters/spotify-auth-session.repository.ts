@@ -11,6 +11,11 @@ export class SpotifyAuthSessionRepository extends SpotifyAuthSessionRepositoryPo
     return Promise.resolve(session || null);
   }
 
+  async findBySessionId(sessionId: string): Promise<SpotifyAuthSession | null> {
+    const session = this.sessions.find((s) => s.sessionId === sessionId);
+    return Promise.resolve(session || null);
+  }
+
   async save(session: SpotifyAuthSession): Promise<SpotifyAuthSession> {
     const existingSession = this.sessions.find(
       (s) => s.spotifyId === session.spotifyId,

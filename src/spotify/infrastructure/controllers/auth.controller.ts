@@ -1,14 +1,10 @@
 import { Controller, Get, Query, Res, HttpStatus, Req } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { SpotifyAuthService } from '../../application/services/spotify-auth.service';
-import { SpotifyClientPort } from '../../domain/ports/spotify-client.port';
 
 @Controller('auth/spotify')
 export class AuthController {
-  constructor(
-    private readonly spotifyAuthService: SpotifyAuthService,
-    private readonly spotifyClient: SpotifyClientPort,
-  ) {}
+  constructor(private readonly spotifyAuthService: SpotifyAuthService) {}
 
   @Get('login')
   async login(@Res() res: Response, @Req() req: Request) {
@@ -17,6 +13,17 @@ export class AuthController {
 
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
+
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) {
+          console.error('Failed to save session:', err);
+          return reject(err);
+        }
+
+        resolve();
+      });
+    }).then(() => console.log(req.session));
 
     return res.redirect(url);
   }
@@ -29,6 +36,7 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
+    console.log(req.session);
     if (error) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Access denied',
@@ -36,6 +44,7 @@ export class AuthController {
       });
     }
 
+    console.log(state, req.session.state);
     if (!state || state !== req.session.state) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Invalid state parameter',
@@ -52,6 +61,7 @@ export class AuthController {
       const user = await this.spotifyAuthService.handleCallback(
         code,
         req.session.codeVerifier!,
+        req.sessionID,
       );
 
       delete req.session.codeVerifier;
@@ -69,25 +79,8 @@ export class AuthController {
     } catch (error) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         error: 'Authentication failed',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         message: error?.message,
       });
     }
   }
-
-  // @Get('me')
-  // @UseGuards(SpotifyAuthGuard)
-  // async getProfile(@Req() req: Request) {
-  //   const session = (req as any).spotifySession;
-  //   const profile = await this.spotifyClient.getUserProfile(
-  //     session.accessToken,
-  //   );
-
-  //   return {
-  //     id: profile.id,
-  //     displayName: profile.displayName,
-  //     email: profile.email,
-  //     profileImage: profile.images?.[0]?.url,
-  //   };
-  // }
 }
