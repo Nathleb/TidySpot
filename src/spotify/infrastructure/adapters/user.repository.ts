@@ -42,4 +42,13 @@ export class UserRepository extends UserRepositoryPort {
     }
     return Promise.resolve();
   }
+
+  async saveOrUpdate(user: User): Promise<User> {
+    const existingUser = await this.findBySpotifyId(user.spotifyId);
+    if (existingUser) {
+      return this.update(user);
+    } else {
+      return this.save(user);
+    }
+  }
 }

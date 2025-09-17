@@ -41,4 +41,13 @@ export class SpotifyAuthSessionRepository extends SpotifyAuthSessionRepositoryPo
     }
     return Promise.resolve();
   }
+
+  async saveOrUpdate(session: SpotifyAuthSession): Promise<SpotifyAuthSession> {
+    const existingSession = await this.findBySpotifyId(session.spotifyId);
+    if (existingSession) {
+      return this.update(session);
+    } else {
+      return this.save(session);
+    }
+  }
 }

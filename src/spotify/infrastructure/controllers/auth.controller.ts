@@ -57,8 +57,6 @@ export class AuthController {
       delete req.session.codeVerifier;
       delete req.session.state;
 
-      req.session.spotifyId = user.spotifyId;
-
       return res.json({
         success: true,
         user: {

@@ -7,11 +7,6 @@ import * as crypto from 'crypto';
 import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotifyAuthSession';
 import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/spotify-auth-session-repository.port';
 
-export interface AuthUrlResponse {
-  url: string;
-  codeVerifier: string;
-  state: string;
-}
 @Injectable()
 export class SpotifyAuthService {
   constructor(
@@ -21,7 +16,11 @@ export class SpotifyAuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async getAuthUrl(): Promise<AuthUrlResponse> {
+  async getAuthUrl(): Promise<{
+    url: string;
+    codeVerifier: string;
+    state: string;
+  }> {
     const clientId = this.configService.getOrThrow<string>('spotify.clientId');
     const redirectUri = this.configService.getOrThrow<string>(
       'spotify.redirectUri',
@@ -66,29 +65,9 @@ export class SpotifyAuthService {
         tokens.accessToken,
       );
 
-      let user: User;
-      const existingUser = await this.userRepository.findBySpotifyId(
-        profile.id,
-      );
-      if (existingUser) {
-        user = await this.userRepository.update(
-          new User(
-            profile.id,
-            profile.displayName,
-            profile.email,
-            profile.images?.[0]?.url,
-          ),
-        );
-      } else {
-        user = await this.userRepository.save(
-          new User(
-            profile.id,
-            profile.displayName,
-            profile.email,
-            profile.images?.[0]?.url,
-          ),
-        );
-      }
+      const user: User = User.fromSpotifyUserProfile(profile);
+
+      this.userRepository.saveOrUpdate(user);
 
       const tokenExpiresAt = new Date(Date.now() + tokens.expiresIn * 1000);
       const session = new SpotifyAuthSession(
@@ -98,14 +77,7 @@ export class SpotifyAuthService {
         tokenExpiresAt,
       );
 
-      const existingSession =
-        await this.spotifyAuthSessionRepository.findBySpotifyId(profile.id);
-      if (existingSession) {
-        await this.spotifyAuthSessionRepository.update(session);
-      } else {
-        await this.spotifyAuthSessionRepository.save(session);
-      }
-
+      this.spotifyAuthSessionRepository.saveOrUpdate(session);
       return user;
     } catch (error) {
       console.error('Failed to authenticate with Spotify', error);
