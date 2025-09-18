@@ -87,4 +87,45 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
       );
     }
   }
+
+  async getTracksByPlaylistId(
+    accessToken: string,
+    playlistId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<Track[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<SpotifyApi.PlaylistTrackResponse>(
+          `${this.apiUrl}/playlists/${playlistId}/tracks`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            params: { limit, offset },
+          },
+        ),
+      );
+
+      return response.data.items.map((item) => {
+        const track = item.track as SpotifyApi.TrackObjectFull;
+        return new Track(
+          track.id,
+          track.name,
+          track.artists.map((artist) => artist.name),
+          track.album.name,
+          track.album.images[0]?.url || '',
+          track.preview_url,
+          track.duration_ms,
+          track.external_urls.spotify,
+        );
+      });
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to get tracks by playlist ID',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 }

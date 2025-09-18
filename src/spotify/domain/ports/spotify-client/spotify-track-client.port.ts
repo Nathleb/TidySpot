@@ -6,6 +6,12 @@ export abstract class SpotifyTrackClientPort {
     limit?: number,
     offset?: number,
   ): Promise<Track[]>;
+  abstract getTracksByPlaylistId(
+    accessToken: string,
+    playlistId: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<Track[]>;
   abstract addTracksToPlaylist(
     accessToken: string,
     playlistId: string,

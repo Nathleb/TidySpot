@@ -38,7 +38,6 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
             playlist.name,
             playlist.description || '',
             playlist.tracks.total,
-            playlist.owner.display_name || '',
             playlist.external_urls.spotify,
             playlist.images[0]?.url || '',
           );
@@ -83,7 +82,6 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
         playlist.name,
         playlist.description || '',
         playlist.tracks.total,
-        playlist.owner.display_name || '',
         playlist.external_urls.spotify,
         playlist.images[0]?.url || '',
       );

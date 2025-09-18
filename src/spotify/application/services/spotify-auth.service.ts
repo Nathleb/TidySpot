@@ -13,6 +13,7 @@ export class SpotifyAuthService {
     private readonly spotifyAuthClient: SpotifyAuthClientPort,
     private readonly spotifyUserService: SpotifyUserService,
     private readonly spotifyAuthSessionRepository: SpotifyAuthSessionRepositoryPort,
+    // remove maybe with crypto to remove dependencies
     private readonly configService: ConfigService,
   ) {}
 
