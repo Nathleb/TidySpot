@@ -37,7 +37,10 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
 
       return response.data.items.map((item: SpotifyApi.SavedTrackObject) => {
         const { track } = item;
-
+        // track.is_local
+        // track.uri
+        // track.href
+        // track.external_urls
         return new Track(
           track.id,
           track.name,

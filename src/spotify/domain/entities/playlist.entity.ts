@@ -5,7 +5,11 @@ export class Playlist {
     public readonly description: string,
     public readonly trackCount: number,
     public readonly externalUrl: string,
-    // public readonly tracks: Track[],
     public readonly imageUrl?: string,
+    public isUsedForSorting: boolean = false,
   ) {}
+
+  toggleUsedForSorting(): void {
+    this.isUsedForSorting = !this.isUsedForSorting;
+  }
 }

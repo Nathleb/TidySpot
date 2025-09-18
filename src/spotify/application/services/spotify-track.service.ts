@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepositoryPort } from 'src/spotify/domain/ports/repositories/user-repository.port';
 import { SpotifyTrackClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-track-client.port';
-import { Track } from 'src/spotify/domain/entities/track.entity';
-import { User } from 'src/spotify/domain/entities/user.entity';
+import { TrackDto } from '../dto/track.dto';
 
 @Injectable()
 export class SpotifyTrackService {
@@ -11,23 +10,10 @@ export class SpotifyTrackService {
     private readonly spotifyTrackClient: SpotifyTrackClientPort,
   ) {}
 
-  async getLikedTracks(accessToken: string): Promise<Track[]> {
-    return await this.spotifyTrackClient.getLikedTracks(accessToken);
-  }
-
-  async saveLikedTracksToUser(
-    accessToken: string,
-    spotifyId: string,
-  ): Promise<User> {
-    const user = await this.userRepository.findBySpotifyId(spotifyId);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    // const likedTracks = await this.getLikedTracks(accessToken);
-    // user.likedTracks = likedTracks;
-
-    return await this.userRepository.saveOrUpdate(user);
+  async getLikedTracks(accessToken: string): Promise<TrackDto[]> {
+    return (await this.spotifyTrackClient.getLikedTracks(accessToken)).map(
+      TrackDto.fromEntity,
+    );
   }
 
   async addTracksToPlaylist(
