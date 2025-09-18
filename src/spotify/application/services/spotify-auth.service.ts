@@ -74,7 +74,6 @@ export class SpotifyAuthService {
       this.userRepository.saveOrUpdate(user);
 
       const tokenExpiresAt = new Date(Date.now() + tokens.expiresIn * 1000);
-      console.log(sessionID);
       const session = new SpotifyAuthSession(
         sessionID,
         profile.id,

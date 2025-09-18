@@ -6,7 +6,7 @@ import type { CustomRequest } from 'src/types/express/express';
 
 @Controller('users')
 @UseGuards(SpotifyAuthGuard)
-export class UserController {
+export class UsersController {
   constructor(private readonly spotifyUserService: SpotifyUserService) {}
 
   @Get('me')

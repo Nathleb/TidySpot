@@ -14,18 +14,7 @@ export class AuthController {
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
 
-    await new Promise<void>((resolve, reject) => {
-      req.session.save((err) => {
-        if (err) {
-          console.error('Failed to save session:', err);
-          return reject(err);
-        }
-
-        resolve();
-      });
-    }).then(() => console.log(req.session));
-
-    return res.redirect(url);
+    res.redirect(url);
   }
 
   @Get('callback')
@@ -36,7 +25,6 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    console.log(req.session);
     if (error) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Access denied',
@@ -44,7 +32,6 @@ export class AuthController {
       });
     }
 
-    console.log(state, req.session.state);
     if (!state || state !== req.session.state) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Invalid state parameter',
