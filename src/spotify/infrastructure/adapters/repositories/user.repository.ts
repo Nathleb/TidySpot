@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from 'src/spotify/domain/entities/user.entity';
-import { UserRepositoryPort } from 'src/spotify/domain/ports/user-repository.port';
+import { UserRepositoryPort } from 'src/spotify/domain/ports/repositories/user-repository.port';
 
 // In memory repo for local dev
 @Injectable()

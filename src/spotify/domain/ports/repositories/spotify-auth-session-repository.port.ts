@@ -1,4 +1,4 @@
-import { SpotifyAuthSession } from '../entities/spotifyAuthSession';
+import { SpotifyAuthSession } from '../../entities/spotifyAuthSession';
 
 export abstract class SpotifyAuthSessionRepositoryPort {
   abstract findBySpotifyId(

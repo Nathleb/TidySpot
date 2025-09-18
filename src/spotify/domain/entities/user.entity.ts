@@ -1,4 +1,4 @@
-import { SpotifyUserProfile } from '../ports/spotify-client.port';
+import { SpotifyUserProfile } from '../ports/spotify-client/interfaces/SpotifyUserProfile';
 
 export class User {
   constructor(

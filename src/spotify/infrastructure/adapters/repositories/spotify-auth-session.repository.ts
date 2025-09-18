@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotifyAuthSession';
-import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/spotify-auth-session-repository.port';
+import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/repositories/spotify-auth-session-repository.port';
 
 @Injectable()
 export class SpotifyAuthSessionRepository extends SpotifyAuthSessionRepositoryPort {

@@ -4,15 +4,15 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SpotifyAuthSessionRepositoryPort } from '../../domain/ports/spotify-auth-session-repository.port';
-import { SpotifyClientPort } from '../../domain/ports/spotify-client.port';
+import { SpotifyAuthSessionRepositoryPort } from '../../domain/ports/repositories/spotify-auth-session-repository.port';
 import { Request } from 'express';
+import { SpotifyAuthClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-auth-client.port';
 
 @Injectable()
 export class SpotifyAuthGuard implements CanActivate {
   constructor(
     private readonly sessionRepository: SpotifyAuthSessionRepositoryPort,
-    private readonly spotifyClient: SpotifyClientPort,
+    private readonly spotifyAuthClient: SpotifyAuthClientPort,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,7 +32,7 @@ export class SpotifyAuthGuard implements CanActivate {
     const now = new Date();
     if (session.tokenExpiresAt <= now) {
       try {
-        const newTokens = await this.spotifyClient.refreshTokens(
+        const newTokens = await this.spotifyAuthClient.refreshTokens(
           session.refreshToken,
         );
 

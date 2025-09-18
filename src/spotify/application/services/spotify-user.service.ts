@@ -1,25 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { SpotifyClientPort } from '../../domain/ports/spotify-client.port';
 import { User } from '../../domain/entities/user.entity';
-import { UserRepositoryPort } from 'src/spotify/domain/ports/user-repository.port';
+import { UserRepositoryPort } from 'src/spotify/domain/ports/repositories/user-repository.port';
+import { SpotifyUserClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-user-client.port';
 
 @Injectable()
 export class SpotifyUserService {
   constructor(
     private readonly userRepository: UserRepositoryPort,
-    private readonly spotifyClient: SpotifyClientPort,
+    private readonly spotifyUserClient: SpotifyUserClientPort,
   ) {}
 
   async updateUserProfileFromSpotify(accessToken: string): Promise<User> {
-    const profile = await this.spotifyClient.getUserProfile(accessToken);
+    const profile = await this.spotifyUserClient.getUserProfile(accessToken);
 
-    const updatedUser = new User(
-      profile.id,
-      profile.displayName,
-      profile.email,
-      profile.images?.[0]?.url,
-    );
-
+    const updatedUser: User = User.fromSpotifyUserProfile(profile);
     const user = await this.userRepository.saveOrUpdate(updatedUser);
 
     return user;
