@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotifyAuthSession';
+import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotify-auth-session.entity';
 import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/repositories/spotify-auth-session-repository.port';
 
 @Injectable()

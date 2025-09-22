@@ -4,8 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { SpotifyAuthClientPort } from '../../../domain/ports/spotify-client/spotify-auth-client.port';
 import { AxiosResponse } from 'axios';
-import { SpotifyResponseToken } from './interfaces/SpotifyResponseToken';
-import { SpotifyTokens } from 'src/spotify/domain/ports/spotify-client/interfaces/SpotifyTokens';
+import { SpotifyAuthDto } from 'src/spotify/application/dto/spotify-auth.dto';
 
 @Injectable()
 export class SpotifyAuthApiAdapter extends SpotifyAuthClientPort {
@@ -33,7 +32,7 @@ export class SpotifyAuthApiAdapter extends SpotifyAuthClientPort {
   async exchangeCodeForTokens(
     code: string,
     codeVerifier: string,
-  ): Promise<SpotifyTokens> {
+  ): Promise<SpotifyAuthDto> {
     const params = new URLSearchParams({
       client_id: this.clientId,
       grant_type: 'authorization_code',
@@ -47,48 +46,8 @@ export class SpotifyAuthApiAdapter extends SpotifyAuthClientPort {
     ).toString('base64');
 
     try {
-      const response: AxiosResponse<SpotifyResponseToken> =
-        await firstValueFrom(
-          this.httpService.post(
-            `${this.accountUrl}/api/token`,
-            params.toString(),
-            {
-              headers: {
-                Authorization: `Basic ${authHeader}`,
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            },
-          ),
-        );
-
-      return {
-        accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token,
-        expiresIn: response.data.expires_in,
-      };
-    } catch (error) {
-      console.error(error);
-      throw new HttpException(
-        'Failed to exchange code for tokens',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  async refreshTokens(refreshToken: string): Promise<SpotifyTokens> {
-    const params = new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-      client_id: this.clientId,
-    });
-
-    const authHeader = Buffer.from(
-      `${this.clientId}:${this.clientSecret}`,
-    ).toString('base64');
-
-    try {
-      const response = await firstValueFrom(
-        this.httpService.post<SpotifyResponseToken>(
+      const response: AxiosResponse<SpotifyAuthDto> = await firstValueFrom(
+        this.httpService.post(
           `${this.accountUrl}/api/token`,
           params.toString(),
           {
@@ -101,9 +60,48 @@ export class SpotifyAuthApiAdapter extends SpotifyAuthClientPort {
       );
 
       return {
-        accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token || refreshToken,
-        expiresIn: response.data.expires_in,
+        access_token: response.data.access_token,
+        refresh_token: response.data.refresh_token,
+        expires_in: response.data.expires_in,
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to exchange code for tokens',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async refreshTokens(refreshToken: string): Promise<SpotifyAuthDto> {
+    const params = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: this.clientId,
+    });
+
+    const authHeader = Buffer.from(
+      `${this.clientId}:${this.clientSecret}`,
+    ).toString('base64');
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<SpotifyAuthDto>(
+          `${this.accountUrl}/api/token`,
+          params.toString(),
+          {
+            headers: {
+              Authorization: `Basic ${authHeader}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          },
+        ),
+      );
+
+      return {
+        access_token: response.data.access_token,
+        refresh_token: response.data.refresh_token || refreshToken,
+        expires_in: response.data.expires_in,
       };
     } catch (error) {
       console.error(error);

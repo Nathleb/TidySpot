@@ -1,19 +1,24 @@
-import { SpotifyUserProfile } from '../ports/spotify-client/interfaces/SpotifyUserProfile';
+import { SpotifyUserProfileDto } from 'src/spotify/application/dto/spotify-user-profile.dto';
 
 export class User {
   constructor(
-    public readonly spotifyId: string,
+    public readonly id: string,
     public readonly displayName: string,
-    public readonly email: string,
-    public readonly profileImage?: string,
+    public readonly email?: string,
+    public readonly profileImageUrl?: string,
+    public readonly spotifyUrl?: string,
+    public readonly country?: string,
+    public readonly updatedAt: Date = new Date(),
   ) {}
 
-  static fromSpotifyUserProfile(profile: SpotifyUserProfile) {
+  static fromSpotifyUserProfile(profile: SpotifyUserProfileDto): User {
     return new User(
       profile.id,
-      profile.displayName,
+      profile.display_name,
       profile.email,
-      profile.images && profile.images.length > 0 ? profile.images[0].url : '',
+      profile.images?.[0]?.url,
+      profile.external_urls?.spotify,
+      profile.country,
     );
   }
 }

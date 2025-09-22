@@ -2,16 +2,16 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../../domain/entities/user.entity';
 import * as crypto from 'crypto';
-import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotifyAuthSession';
+import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotify-auth-session.entity';
 import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/repositories/spotify-auth-session-repository.port';
 import { SpotifyAuthClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-auth-client.port';
-import { SpotifyUserService } from './spotify-user.service';
+import { SyncSpotifyAccountUsecase } from '../usecases/synchronise-spotify-profile/sync-spotify-account.usecase';
 
 @Injectable()
 export class SpotifyAuthService {
   constructor(
     private readonly spotifyAuthClient: SpotifyAuthClientPort,
-    private readonly spotifyUserService: SpotifyUserService,
+    private readonly syncSpotifyAccountUsecase: SyncSpotifyAccountUsecase,
     private readonly spotifyAuthSessionRepository: SpotifyAuthSessionRepositoryPort,
     // remove maybe with crypto to remove dependencies
     private readonly configService: ConfigService,
@@ -66,16 +66,16 @@ export class SpotifyAuthService {
         code,
         codeVerifier,
       );
-      const user = await this.spotifyUserService.updateUserProfileFromSpotify(
-        tokens.accessToken,
-      );
+      const user = await this.syncSpotifyAccountUsecase.execute({
+        accessToken: tokens.access_token,
+      });
 
-      const tokenExpiresAt = new Date(Date.now() + tokens.expiresIn * 1000);
+      const tokenExpiresAt = new Date(Date.now() + tokens.expires_in * 1000);
       const session = new SpotifyAuthSession(
         sessionID,
-        user.spotifyId,
-        tokens.accessToken,
-        tokens.refreshToken,
+        user.id,
+        tokens.access_token,
+        tokens.refresh_token || '',
         tokenExpiresAt,
       );
 
@@ -100,9 +100,9 @@ export class SpotifyAuthService {
       );
 
       const updatedSession = session.refresh(
-        tokens.accessToken,
-        tokens.refreshToken,
-        tokens.expiresIn,
+        tokens.access_token,
+        tokens.refresh_token || session.refreshToken,
+        tokens.expires_in,
       );
 
       return await this.spotifyAuthSessionRepository.update(updatedSession);

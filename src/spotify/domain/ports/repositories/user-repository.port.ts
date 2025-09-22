@@ -7,3 +7,8 @@ export abstract class UserRepositoryPort {
   abstract update(user: User): Promise<User>;
   abstract delete(spotifyId: string): Promise<void>;
 }
+
+// export interface UserRepositoryPort {
+//   findById(id: string): Promise<User | null>;
+//   saveOrUpdate(user: User): Promise<User>;
+// }

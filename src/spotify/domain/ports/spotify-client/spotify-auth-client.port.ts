@@ -1,9 +1,9 @@
-import { SpotifyTokens } from './interfaces/SpotifyTokens';
+import { SpotifyAuthDto } from 'src/spotify/application/dto/spotify-auth.dto';
 
 export abstract class SpotifyAuthClientPort {
   abstract exchangeCodeForTokens(
     code: string,
     codeVerifier: string,
-  ): Promise<SpotifyTokens>;
-  abstract refreshTokens(refreshToken: string): Promise<SpotifyTokens>;
+  ): Promise<SpotifyAuthDto>;
+  abstract refreshTokens(refreshToken: string): Promise<SpotifyAuthDto>;
 }

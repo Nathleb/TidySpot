@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepositoryPort } from 'src/spotify/domain/ports/repositories/user-repository.port';
 import { SpotifyTrackClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-track-client.port';
-import { TrackDto } from '../dto/track.dto';
+import { SpotifyLikedTrackDto } from '../dto/spotify-liked-track.dto';
 
 @Injectable()
 export class SpotifyTrackService {
@@ -10,10 +10,8 @@ export class SpotifyTrackService {
     private readonly spotifyTrackClient: SpotifyTrackClientPort,
   ) {}
 
-  async getLikedTracks(accessToken: string): Promise<TrackDto[]> {
-    return (await this.spotifyTrackClient.getLikedTracks(accessToken)).map(
-      TrackDto.fromEntity,
-    );
+  async getLikedTracks(accessToken: string): Promise<SpotifyLikedTrackDto[]> {
+    return await this.spotifyTrackClient.getLikedTracks(accessToken);
   }
 
   async addTracksToPlaylist(
