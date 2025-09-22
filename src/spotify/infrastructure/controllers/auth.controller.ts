@@ -57,10 +57,10 @@ export class AuthController {
       return res.json({
         success: true,
         user: {
-          id: user.spotifyId,
+          id: user.id,
           displayName: user.displayName,
           email: user.email,
-          profileImage: user.profileImage,
+          profileImage: user.profileImageUrl,
         },
       });
     } catch (error) {

@@ -66,6 +66,7 @@ export class SpotifyAuthService {
         code,
         codeVerifier,
       );
+
       const { user } = await this.syncSpotifyAccountUseCase.execute({
         accessToken: tokens.access_token,
       });
@@ -75,7 +76,7 @@ export class SpotifyAuthService {
         sessionID,
         user.id,
         tokens.access_token,
-        tokens.refresh_token || '',
+        tokens.refresh_token,
         tokenExpiresAt,
       );
 

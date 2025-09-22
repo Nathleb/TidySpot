@@ -1,11 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 import { User } from 'src/spotify/domain/entities/user.entity';
 import { UserRepositoryPort } from 'src/spotify/domain/ports/repositories/user-repository.port';
 
-// In memory repo for local dev
 @Injectable()
-export class UserRepository extends UserRepositoryPort {
+export class UserRepository extends UserRepositoryPort implements OnModuleInit {
   private users: User[] = [];
+  private readonly filePath = join(process.cwd(), 'data', 'users.json');
+
+  async onModuleInit() {
+    await this.loadUsers();
+  }
+
+  private async loadUsers(): Promise<void> {
+    try {
+      // Ensure data directory exists
+      await fs.mkdir(join(process.cwd(), 'data'), { recursive: true });
+
+      const data = await fs.readFile(this.filePath, 'utf8');
+      this.users = JSON.parse(data);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // File doesn't exist, start with empty array
+        this.users = [];
+        await this.persistUsers();
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private async persistUsers(): Promise<void> {
+    await fs.writeFile(this.filePath, JSON.stringify(this.users, null, 2));
+  }
 
   async findById(id: string): Promise<User | null> {
     const user = this.users.find((u) => u.id === id);
@@ -18,6 +46,7 @@ export class UserRepository extends UserRepositoryPort {
       throw new Error(`User with Spotify ID ${user.id} already exists.`);
     }
     this.users.push(user);
+    await this.persistUsers();
     return Promise.resolve(user);
   }
 
@@ -27,6 +56,7 @@ export class UserRepository extends UserRepositoryPort {
       throw new NotFoundException(`User with Spotify ID ${user.id} not found.`);
     }
     this.users[index] = user;
+    await this.persistUsers();
     return Promise.resolve(user);
   }
 
@@ -36,6 +66,7 @@ export class UserRepository extends UserRepositoryPort {
     if (this.users.length === initialLength) {
       throw new NotFoundException(`User with Spotify ID ${id} not found.`);
     }
+    await this.persistUsers();
     return Promise.resolve();
   }
 

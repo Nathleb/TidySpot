@@ -21,11 +21,14 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
     this.apiUrl = this.configService.getOrThrow<string>('spotify.apiUrl');
   }
 
-  async getUserPlaylists(accessToken: string): Promise<SpotifyPlaylistDto[]> {
+  async getUserPlaylists(
+    accessToken: string,
+    userId: string,
+  ): Promise<SpotifyPlaylistDto[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<SpotifyApi.ListOfCurrentUsersPlaylistsResponse>(
-          `${this.apiUrl}/me/playlists`,
+          `${this.apiUrl}/v1/users/${userId}/playlists`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -53,7 +56,7 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
     try {
       const response = await firstValueFrom(
         this.httpService.post<SpotifyApi.CreatePlaylistResponse>(
-          `${this.apiUrl}/users/${userId}/playlists`,
+          `${this.apiUrl}/v1/users/${userId}/playlists`,
           {
             name,
             description,

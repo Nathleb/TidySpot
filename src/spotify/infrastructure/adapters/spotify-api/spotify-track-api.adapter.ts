@@ -29,7 +29,7 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
     try {
       const response = await firstValueFrom(
         this.httpService.get<SpotifyApi.UsersSavedTracksResponse>(
-          `${this.apiUrl}/me/tracks`,
+          `${this.apiUrl}/v1/me/tracks`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -58,7 +58,7 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
     try {
       const response = await firstValueFrom(
         this.httpService.get<SpotifyApi.PlaylistTrackResponse>(
-          `${this.apiUrl}/playlists/${playlistId}/tracks`,
+          `${this.apiUrl}/v1/playlists/${playlistId}/tracks`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -91,7 +91,7 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
       const uris = trackIds.map((id) => `spotify:track:${id}`);
       await firstValueFrom(
         this.httpService.post(
-          `${this.apiUrl}/playlists/${playlistId}/tracks`,
+          `${this.apiUrl}/v1/playlists/${playlistId}/tracks`,
           { uris },
           {
             headers: {

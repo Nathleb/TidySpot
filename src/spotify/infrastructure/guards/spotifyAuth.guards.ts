@@ -37,9 +37,9 @@ export class SpotifyAuthGuard implements CanActivate {
         );
 
         session.refresh(
-          newTokens.accessToken,
-          newTokens.refreshToken,
-          newTokens.expiresIn,
+          newTokens.access_token,
+          newTokens.refresh_token,
+          newTokens.expires_in,
         );
 
         await this.sessionRepository.update(session);

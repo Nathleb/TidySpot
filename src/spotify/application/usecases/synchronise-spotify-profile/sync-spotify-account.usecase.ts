@@ -2,12 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../../../domain/entities/user.entity';
 import { UserRepositoryPort } from 'src/spotify/domain/ports/repositories/user-repository.port';
 import { SpotifyUserClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-user-client.port';
-import { PlaylistTrack } from 'src/spotify/domain/entities/playlist-track.entity';
-import { Playlist } from 'src/spotify/domain/entities/playlist.entity';
 import { SpotifyPlaylistClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-playlist-client.port';
 import { SpotifyTrackClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-track-client.port';
-import { LikedTrack } from 'src/spotify/domain/entities/liked-track.entity';
-import { PlaylistRepositoryPort } from 'src/spotify/domain/ports/repositories/platlist-repository.port';
+import { PlaylistRepositoryPort } from 'src/spotify/domain/ports/repositories/playlist-repository.port';
 import { PlaylistTrackRepositoryPort } from 'src/spotify/domain/ports/repositories/playlist-track-repository.port';
 import { LikedTrackRepositoryPort } from 'src/spotify/domain/ports/repositories/liked-track-repository.port';
 
@@ -17,8 +14,8 @@ export interface SyncSpotifyAccountCommand {
 
 export interface SyncSpotifyAccountResult {
   user: User;
-  playlistsCount: number;
-  LikedTracks: number;
+  // playlistsCount: number;
+  // LikedTracks: number;
   syncedAt: Date;
 }
 
@@ -44,45 +41,47 @@ export class SyncSpotifyAccountUseCase {
     const user = User.fromSpotifyUserProfile(spotifyProfile);
     await this.userRepository.saveOrUpdate(user);
 
-    const spotifyPlaylists =
-      await this.spotifyPlaylistClient.getUserPlaylists(accessToken);
-    const playlists = spotifyPlaylists.map((playlist) =>
-      Playlist.fromSpotifyPlaylist(playlist),
-    );
+    // const spotifyPlaylists = await this.spotifyPlaylistClient.getUserPlaylists(
+    //   accessToken,
+    //   user.id,
+    // );
+    // const playlists = spotifyPlaylists.map((playlist) =>
+    //   Playlist.fromSpotifyPlaylist(playlist),
+    // );
 
-    await this.playlistRepository.saveUserPlaylists(user.id, playlists);
-    const playlistsCount = playlists.length;
+    // await this.playlistRepository.saveUserPlaylists(user.id, playlists);
+    // const playlistsCount = playlists.length;
 
-    const spotifyLikedTracks =
-      await this.spotifyTrackClient.getAllUserLikedTracks(accessToken);
-    const likedTracks = spotifyLikedTracks.map((savedTrack) =>
-      LikedTrack.fromSpotifyLikedTrack(savedTrack, user.id),
-    );
+    // const spotifyLikedTracks =
+    //   await this.spotifyTrackClient.getAllUserLikedTracks(accessToken);
+    // const likedTracks = spotifyLikedTracks.map((savedTrack) =>
+    //   LikedTrack.fromSpotifyLikedTrack(savedTrack, user.id),
+    // );
 
-    await this.likedTrackRepository.saveUserLikedSongs(user.id, likedTracks);
-    const LikedTracks = likedTracks.length;
+    // await this.likedTrackRepository.saveUserLikedSongs(user.id, likedTracks);
+    // const LikedTracks = likedTracks.length;
 
-    for (const playlist of playlists) {
-      if (playlist.isOwnedBy(user.id)) {
-        const playlistTracks = await this.spotifyTrackClient.getPlaylistTracks(
-          accessToken,
-          playlist.id,
-        );
+    // for (const playlist of playlists) {
+    //   if (playlist.isOwnedBy(user.id)) {
+    //     const playlistTracks = await this.spotifyTrackClient.getPlaylistTracks(
+    //       accessToken,
+    //       playlist.id,
+    //     );
 
-        const tracks = playlistTracks.map((track) =>
-          PlaylistTrack.fromSpotifyPlaylistTrack(track, playlist.id),
-        );
-        await this.playlistTrackRepository.savePlaylistTracks(
-          playlist.id,
-          tracks,
-        );
-      }
-    }
+    //     const tracks = playlistTracks.map((track) =>
+    //       PlaylistTrack.fromSpotifyPlaylistTrack(track, playlist.id),
+    //     );
+    //     await this.playlistTrackRepository.savePlaylistTracks(
+    //       playlist.id,
+    //       tracks,
+    //     );
+    //   }
+    // }
 
     return {
       user,
-      playlistsCount,
-      LikedTracks,
+      // playlistsCount,
+      // LikedTracks,
       syncedAt: new Date(),
     };
   }
