@@ -3,7 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { SpotifyUserClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-user-client.port';
-import { SpotifyUserProfile } from 'src/spotify/domain/ports/spotify-client/interfaces/SpotifyUserProfile';
+import {
+  mapToSpotifyUserProfileDto,
+  SpotifyUserProfileDto,
+} from 'src/spotify/application/dto/spotify-user-profile.dto';
 
 @Injectable()
 export class SpotifyUserApiAdapter extends SpotifyUserClientPort {
@@ -17,7 +20,7 @@ export class SpotifyUserApiAdapter extends SpotifyUserClientPort {
     this.apiUrl = this.configService.getOrThrow<string>('spotify.apiUrl');
   }
 
-  async getUserProfile(accessToken: string): Promise<SpotifyUserProfile> {
+  async getUserProfile(accessToken: string): Promise<SpotifyUserProfileDto> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<SpotifyApi.CurrentUsersProfileResponse>(
@@ -30,12 +33,7 @@ export class SpotifyUserApiAdapter extends SpotifyUserClientPort {
         ),
       );
 
-      return {
-        id: response.data.id,
-        displayName: response.data.display_name || 'John Doe',
-        email: response.data.email,
-        images: response.data.images,
-      };
+      return mapToSpotifyUserProfileDto(response.data);
     } catch (error) {
       console.error(error);
       throw new HttpException(

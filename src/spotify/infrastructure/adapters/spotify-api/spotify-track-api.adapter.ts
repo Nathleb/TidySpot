@@ -2,8 +2,12 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { Track } from 'src/spotify/domain/entities/track.entity';
 import { SpotifyTrackClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-track-client.port';
+import {
+  mapToSpotifyLikedTrackDto,
+  SpotifyLikedTrackDto,
+} from 'src/spotify/application/dto/spotify-liked-track.dto';
+import { SpotifyPlaylistTrackDto } from 'src/spotify/application/dto/spotify-playlist-track.dto';
 
 @Injectable()
 export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
@@ -17,11 +21,11 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
     this.apiUrl = this.configService.getOrThrow<string>('spotify.apiUrl');
   }
 
-  async getLikedTracks(
+  async getUserLikedTracks(
     accessToken: string,
     limit = 50,
     offset = 0,
-  ): Promise<Track[]> {
+  ): Promise<SpotifyLikedTrackDto[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<SpotifyApi.UsersSavedTracksResponse>(
@@ -35,27 +39,44 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
         ),
       );
 
-      return response.data.items.map((item: SpotifyApi.SavedTrackObject) => {
-        const { track } = item;
-        // track.is_local
-        // track.uri
-        // track.href
-        // track.external_urls
-        return new Track(
-          track.id,
-          track.name,
-          track.artists.map((artist) => artist.name),
-          track.album.name,
-          track.album.images[0]?.url || '',
-          track.preview_url,
-          track.duration_ms,
-          track.external_urls.spotify,
-        );
-      });
+      return response.data.items.map(mapToSpotifyLikedTrackDto);
     } catch (error) {
-      console.error(error);
+      console.error('Failed to get liked tracks:', error);
       throw new HttpException(
         'Failed to get liked tracks',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getPlaylistTracks(
+    accessToken: string,
+    playlistId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<SpotifyPlaylistTrackDto[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<SpotifyApi.PlaylistTrackResponse>(
+          `${this.apiUrl}/playlists/${playlistId}/tracks`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            params: { limit, offset },
+          },
+        ),
+      );
+
+      return response.data.items
+        .filter(
+          (item): item is SpotifyApi.PlaylistTrackObject => item.track !== null,
+        )
+        .map(mapToSpotifyLikedTrackDto);
+    } catch (error) {
+      console.error('Failed to get playlist tracks:', error);
+      throw new HttpException(
+        'Failed to get tracks by playlist ID',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -71,9 +92,7 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
       await firstValueFrom(
         this.httpService.post(
           `${this.apiUrl}/playlists/${playlistId}/tracks`,
-          {
-            uris,
-          },
+          { uris },
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -83,7 +102,7 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
         ),
       );
     } catch (error) {
-      console.error(error);
+      console.error('Failed to add tracks to playlist:', error);
       throw new HttpException(
         'Failed to add tracks to playlist',
         HttpStatus.BAD_REQUEST,
@@ -91,44 +110,47 @@ export class SpotifyTrackApiAdapter extends SpotifyTrackClientPort {
     }
   }
 
-  async getTracksByPlaylistId(
+  async getAllUserLikedTracks(
+    accessToken: string,
+  ): Promise<SpotifyLikedTrackDto[]> {
+    const allTracks: SpotifyLikedTrackDto[] = [];
+    let offset = 0;
+    const limit = 50;
+    let hasMore = true;
+
+    while (hasMore) {
+      const tracks = await this.getUserLikedTracks(accessToken, limit, offset);
+      allTracks.push(...tracks);
+
+      hasMore = tracks.length === limit;
+      offset += limit;
+    }
+
+    return allTracks;
+  }
+
+  async getAllPlaylistTracks(
     accessToken: string,
     playlistId: string,
-    limit = 50,
-    offset = 0,
-  ): Promise<Track[]> {
-    try {
-      const response = await firstValueFrom(
-        this.httpService.get<SpotifyApi.PlaylistTrackResponse>(
-          `${this.apiUrl}/playlists/${playlistId}/tracks`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-            params: { limit, offset },
-          },
-        ),
-      );
+  ): Promise<SpotifyPlaylistTrackDto[]> {
+    const allTracks: SpotifyPlaylistTrackDto[] = [];
+    let offset = 0;
+    const limit = 50;
+    let hasMore = true;
 
-      return response.data.items.map((item) => {
-        const track = item.track as SpotifyApi.TrackObjectFull;
-        return new Track(
-          track.id,
-          track.name,
-          track.artists.map((artist) => artist.name),
-          track.album.name,
-          track.album.images[0]?.url || '',
-          track.preview_url,
-          track.duration_ms,
-          track.external_urls.spotify,
-        );
-      });
-    } catch (error) {
-      console.error(error);
-      throw new HttpException(
-        'Failed to get tracks by playlist ID',
-        HttpStatus.BAD_REQUEST,
+    while (hasMore) {
+      const tracks = await this.getPlaylistTracks(
+        accessToken,
+        playlistId,
+        limit,
+        offset,
       );
+      allTracks.push(...tracks);
+
+      hasMore = tracks.length === limit;
+      offset += limit;
     }
+
+    return allTracks;
   }
 }

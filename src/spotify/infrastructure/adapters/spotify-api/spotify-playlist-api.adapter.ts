@@ -2,8 +2,11 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { Playlist } from 'src/spotify/domain/entities/playlist.entity';
 import { SpotifyPlaylistClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-playlist-client.port';
+import {
+  SpotifyPlaylistDto,
+  mapToSpotifyPlaylistDto,
+} from 'src/spotify/application/dto/spotify-playlist.dto';
 
 @Injectable()
 export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
@@ -18,7 +21,7 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
     this.apiUrl = this.configService.getOrThrow<string>('spotify.apiUrl');
   }
 
-  async getUserPlaylists(accessToken: string): Promise<Playlist[]> {
+  async getUserPlaylists(accessToken: string): Promise<SpotifyPlaylistDto[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<SpotifyApi.ListOfCurrentUsersPlaylistsResponse>(
@@ -31,18 +34,7 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
         ),
       );
 
-      return response.data.items.map(
-        (playlist: SpotifyApi.PlaylistObjectSimplified) => {
-          return new Playlist(
-            playlist.id,
-            playlist.name,
-            playlist.description || '',
-            playlist.tracks.total,
-            playlist.external_urls.spotify,
-            playlist.images[0]?.url || '',
-          );
-        },
-      );
+      return response.data.items.map(mapToSpotifyPlaylistDto);
     } catch (error) {
       console.error(error);
       throw new HttpException(
@@ -57,7 +49,7 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
     userId: string,
     name: string,
     description = '',
-  ): Promise<Playlist> {
+  ): Promise<SpotifyPlaylistDto> {
     try {
       const response = await firstValueFrom(
         this.httpService.post<SpotifyApi.CreatePlaylistResponse>(
@@ -77,14 +69,7 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
       );
 
       const playlist = response.data;
-      return new Playlist(
-        playlist.id,
-        playlist.name,
-        playlist.description || '',
-        playlist.tracks.total,
-        playlist.external_urls.spotify,
-        playlist.images[0]?.url || '',
-      );
+      return mapToSpotifyPlaylistDto(playlist);
     } catch (error) {
       console.error(error);
       throw new HttpException(

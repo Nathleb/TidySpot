@@ -10,8 +10,10 @@ export class SpotifyTrackService {
     private readonly spotifyTrackClient: SpotifyTrackClientPort,
   ) {}
 
-  async getLikedTracks(accessToken: string): Promise<SpotifyLikedTrackDto[]> {
-    return await this.spotifyTrackClient.getLikedTracks(accessToken);
+  async getAllUserLikedTracks(
+    accessToken: string,
+  ): Promise<SpotifyLikedTrackDto[]> {
+    return await this.spotifyTrackClient.getAllUserLikedTracks(accessToken);
   }
 
   async addTracksToPlaylist(

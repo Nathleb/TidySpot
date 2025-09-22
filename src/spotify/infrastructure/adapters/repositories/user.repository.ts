@@ -7,44 +7,40 @@ import { UserRepositoryPort } from 'src/spotify/domain/ports/repositories/user-r
 export class UserRepository extends UserRepositoryPort {
   private users: User[] = [];
 
-  async findBySpotifyId(spotifyId: string): Promise<User | null> {
-    const user = this.users.find((u) => u.spotifyId === spotifyId);
+  async findById(id: string): Promise<User | null> {
+    const user = this.users.find((u) => u.id === id);
     return Promise.resolve(user || null);
   }
 
-  async save(user: User): Promise<User> {
-    const existingUser = this.users.find((u) => u.spotifyId === user.spotifyId);
+  private async save(user: User): Promise<User> {
+    const existingUser = this.users.find((u) => u.id === user.id);
     if (existingUser) {
-      throw new Error(`User with Spotify ID ${user.spotifyId} already exists.`);
+      throw new Error(`User with Spotify ID ${user.id} already exists.`);
     }
     this.users.push(user);
     return Promise.resolve(user);
   }
 
-  async update(user: User): Promise<User> {
-    const index = this.users.findIndex((u) => u.spotifyId === user.spotifyId);
+  private async update(user: User): Promise<User> {
+    const index = this.users.findIndex((u) => u.id === user.id);
     if (index === -1) {
-      throw new NotFoundException(
-        `User with Spotify ID ${user.spotifyId} not found.`,
-      );
+      throw new NotFoundException(`User with Spotify ID ${user.id} not found.`);
     }
     this.users[index] = user;
     return Promise.resolve(user);
   }
 
-  async delete(spotifyId: string): Promise<void> {
+  private async delete(id: string): Promise<void> {
     const initialLength = this.users.length;
-    this.users = this.users.filter((u) => u.spotifyId !== spotifyId);
+    this.users = this.users.filter((u) => u.id !== id);
     if (this.users.length === initialLength) {
-      throw new NotFoundException(
-        `User with Spotify ID ${spotifyId} not found.`,
-      );
+      throw new NotFoundException(`User with Spotify ID ${id} not found.`);
     }
     return Promise.resolve();
   }
 
   async saveOrUpdate(user: User): Promise<User> {
-    const existingUser = await this.findBySpotifyId(user.spotifyId);
+    const existingUser = await this.findById(user.id);
     if (existingUser) {
       return this.update(user);
     } else {
