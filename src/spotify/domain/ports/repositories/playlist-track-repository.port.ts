@@ -14,7 +14,7 @@ export abstract class PlaylistTrackRepositoryPort {
 
   abstract findByPlaylistIdAndTrackId(
     playlistId: string,
-    trackId: string, // Assuming trackId is a string
+    trackId: string,
   ): Promise<PlaylistTrack | null>;
 
   abstract getTracksFromSortingPlaylistsByUserId(

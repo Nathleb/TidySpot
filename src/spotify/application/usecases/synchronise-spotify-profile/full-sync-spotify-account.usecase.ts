@@ -22,6 +22,7 @@ export interface FullSyncSpotifyAccountResult {
   syncedAt: Date;
 }
 
+// TODO SyncMetadataEntity, stocker la date de dernier sync, nb d'elements, etc...
 @Injectable()
 export class FullSyncSpotifyAccountUseCase {
   constructor(

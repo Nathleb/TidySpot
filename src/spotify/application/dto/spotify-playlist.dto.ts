@@ -12,6 +12,7 @@ export interface SpotifyPlaylistDto {
   external_urls?: { spotify: string };
   tracks?: { total: number };
 }
+
 /**
  * Maps a Spotify API playlist object to a SpotifyPlaylistDto.
  * @param {SpotifyApi.PlaylistObjectSimplified} playlist The raw playlist object.
