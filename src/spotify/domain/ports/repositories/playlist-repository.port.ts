@@ -7,4 +7,5 @@ export abstract class PlaylistRepositoryPort {
   ): Promise<void>;
   abstract findUserPlaylists(userId: string): Promise<Playlist[]>;
   abstract findPlaylistById(playlistId: string): Promise<Playlist | null>;
+  abstract deletePlaylist(playlistId: string): Promise<void>;
 }

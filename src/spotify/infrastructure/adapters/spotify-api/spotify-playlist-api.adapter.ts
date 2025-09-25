@@ -81,4 +81,25 @@ export class SpotifyPlaylistApiAdapter extends SpotifyPlaylistClientPort {
       );
     }
   }
+
+  async deletePlaylist(accessToken: string, playlistId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.delete(
+          `${this.apiUrl}/v1/playlists/${playlistId}/followers`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Failed to delete playlist',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 }

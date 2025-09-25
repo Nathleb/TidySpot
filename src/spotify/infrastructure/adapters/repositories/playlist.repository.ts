@@ -67,4 +67,20 @@ export class PlaylistRepository
     }
     return Promise.resolve(null);
   }
+
+  async deletePlaylist(playlistId: string): Promise<void> {
+    let found = false;
+    for (const userId in this.userPlaylists) {
+      const playlists = this.userPlaylists[userId];
+      const index = playlists.findIndex((p) => p.id === playlistId);
+      if (index !== -1) {
+        playlists.splice(index, 1);
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      await this.persistPlaylists();
+    }
+  }
 }

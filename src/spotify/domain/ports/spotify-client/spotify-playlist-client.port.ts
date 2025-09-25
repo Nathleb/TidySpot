@@ -11,4 +11,8 @@ export abstract class SpotifyPlaylistClientPort {
     name: string,
     description?: string,
   ): Promise<SpotifyPlaylistDto>;
+  abstract deletePlaylist(
+    accessToken: string,
+    playlistId: string,
+  ): Promise<void>;
 }
