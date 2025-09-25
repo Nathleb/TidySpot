@@ -25,13 +25,13 @@ import { LikedTrackRepositoryPort } from './domain/ports/repositories/liked-trac
 import { LikedTrackRepository } from './infrastructure/adapters/repositories/liked-track.repository';
 import { PlaylistTrackRepository } from './infrastructure/adapters/repositories/playlist-track.repository';
 import { PlaylistRepository } from './infrastructure/adapters/repositories/playlist.repository';
-import { SyncSpotifyAccountUseCase } from './application/usecases/synchronise-spotify-profile/sync-spotify-account.usecase';
+import { FullSyncSpotifyAccountUseCase } from './application/usecases/synchronise-spotify-profile/full-sync-spotify-account.usecase';
 
 @Module({
   imports: [HttpModule, ConfigModule, AppConfigModule],
   controllers: [AuthController, UsersController],
   providers: [
-    SyncSpotifyAccountUseCase,
+    FullSyncSpotifyAccountUseCase,
     SpotifyAuthService,
     {
       provide: SpotifyAuthClientPort,

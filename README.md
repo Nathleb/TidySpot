@@ -2,7 +2,7 @@ Track to Uri table in db (application layer)?
 
 implement useCases
 
--Synchronise profile (only playlist where i can write)
+-Synchronise profile (only playlist where i can write) strategy for syncing
 -toggle a playlist for sorting
 
 

@@ -4,7 +4,7 @@ import type { CustomRequest } from 'src/types/express/express';
 import {
   SyncSpotifyAccountResult,
   SyncSpotifyAccountUseCase,
-} from 'src/spotify/application/usecases/synchronise-spotify-profile/sync-spotify-account.usecase';
+} from 'src/spotify/application/usecases/synchronise-spotify-profile/full-sync-spotify-account.usecase';
 
 @Controller('me')
 @UseGuards(SpotifyAuthGuard)

@@ -5,13 +5,13 @@ import * as crypto from 'crypto';
 import { SpotifyAuthSession } from 'src/spotify/domain/entities/spotify-auth-session.entity';
 import { SpotifyAuthSessionRepositoryPort } from 'src/spotify/domain/ports/repositories/spotify-auth-session-repository.port';
 import { SpotifyAuthClientPort } from 'src/spotify/domain/ports/spotify-client/spotify-auth-client.port';
-import { SyncSpotifyAccountUseCase } from '../usecases/synchronise-spotify-profile/sync-spotify-account.usecase';
+import { FullSyncSpotifyAccountUseCase } from '../usecases/synchronise-spotify-profile/full-sync-spotify-account.usecase';
 
 @Injectable()
 export class SpotifyAuthService {
   constructor(
     private readonly spotifyAuthClient: SpotifyAuthClientPort,
-    private readonly syncSpotifyAccountUseCase: SyncSpotifyAccountUseCase,
+    private readonly fullSyncSpotifyAccountUseCase: FullSyncSpotifyAccountUseCase,
     private readonly spotifyAuthSessionRepository: SpotifyAuthSessionRepositoryPort,
     // remove maybe with crypto to remove dependencies
     private readonly configService: ConfigService,
@@ -67,7 +67,7 @@ export class SpotifyAuthService {
         codeVerifier,
       );
 
-      const { user } = await this.syncSpotifyAccountUseCase.execute({
+      const { user } = await this.fullSyncSpotifyAccountUseCase.execute({
         accessToken: tokens.access_token,
       });
 
