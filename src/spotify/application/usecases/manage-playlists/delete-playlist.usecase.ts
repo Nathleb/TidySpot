@@ -18,10 +18,7 @@ export class DeletePlaylistUseCase {
     const { accessToken, playlistId } = command;
 
     try {
-      const spotifyPlaylist = await this.spotifyPlaylistClient.deletePlaylist(
-        accessToken,
-        playlistId,
-      );
+      await this.spotifyPlaylistClient.deletePlaylist(accessToken, playlistId);
 
       await this.playlistRepository.deletePlaylist(playlistId);
     } catch (error) {

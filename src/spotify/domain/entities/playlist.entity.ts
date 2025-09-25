@@ -10,8 +10,8 @@ export class Playlist {
     public readonly imageUrl?: string,
     public readonly spotifyUrl?: string,
     public readonly totalTracks: number = 0,
-    public readonly updatedAt: Date = new Date(),
     public readonly isUsedForSorting: boolean = false,
+    public readonly updatedAt: Date = new Date(),
   ) {}
 
   static fromSpotifyPlaylist(playlist: SpotifyPlaylistDto): Playlist {
@@ -24,6 +24,7 @@ export class Playlist {
       playlist.images?.[0]?.url,
       playlist.external_urls?.spotify,
       playlist.tracks?.total || 0,
+      true,
     );
   }
 
@@ -41,8 +42,8 @@ export class Playlist {
       this.imageUrl,
       this.spotifyUrl,
       this.totalTracks,
-      this.updatedAt,
       !this.isUsedForSorting,
+      this.updatedAt,
     );
   }
 

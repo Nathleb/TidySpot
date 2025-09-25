@@ -74,7 +74,7 @@ export class FullSyncSpotifyAccountUseCase {
         const tracks = playlistTracks.map((track) =>
           PlaylistTrack.fromSpotifyPlaylistTrack(track, playlist.id),
         );
-        await this.playlistTrackRepository.savePlaylistTracks(
+        await this.playlistTrackRepository.replaceAllPlaylistTracks(
           playlist.id,
           tracks,
         );
