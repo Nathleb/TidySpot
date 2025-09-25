@@ -2,21 +2,21 @@ import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { SpotifyAuthGuard } from '../guards/spotifyAuth.guards';
 import type { CustomRequest } from 'src/types/express/express';
 import {
-  SyncSpotifyAccountResult,
-  SyncSpotifyAccountUseCase,
+  FullSyncSpotifyAccountResult,
+  FullSyncSpotifyAccountUseCase,
 } from 'src/spotify/application/usecases/synchronise-spotify-profile/full-sync-spotify-account.usecase';
 
 @Controller('me')
 @UseGuards(SpotifyAuthGuard)
 export class UsersController {
   constructor(
-    private readonly syncSpotifyAccountUsecase: SyncSpotifyAccountUseCase,
+    private readonly syncSpotifyAccountUsecase: FullSyncSpotifyAccountUseCase,
   ) {}
 
-  @Get('sync')
+  @Get('fullsync')
   async syncProfile(
     @Req() req: CustomRequest,
-  ): Promise<SyncSpotifyAccountResult> {
+  ): Promise<FullSyncSpotifyAccountResult> {
     const accessToken = req.accessToken;
 
     const result = await this.syncSpotifyAccountUsecase.execute({

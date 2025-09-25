@@ -24,7 +24,7 @@ export class ToggleForSortingPlaylistUseCase {
       await this.playlistRepository.save(updatedPlaylist);
       return updatedPlaylist;
     } catch (error) {
-      //differencier error de repo et de spotify
+      //todo differencier error de repo et de spotify
       throw error;
     }
   }

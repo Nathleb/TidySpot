@@ -49,9 +49,9 @@ export class FullSyncSpotifyAccountUseCase {
       accessToken,
       user.id,
     );
-    const playlists = spotifyPlaylists.map((playlist) =>
-      Playlist.fromSpotifyPlaylist(playlist),
-    );
+    const playlists = spotifyPlaylists
+      .map((playlist) => Playlist.fromSpotifyPlaylist(playlist))
+      .filter((playlist) => playlist.ownerId === user.id); // Ne garder que les playlists possédées par l'utilisateur;
 
     await this.playlistRepository.saveMany(playlists);
     const playlistsCount = playlists.length;

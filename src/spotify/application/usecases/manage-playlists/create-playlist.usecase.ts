@@ -36,7 +36,7 @@ export class CreatePlaylistUseCase {
 
       return playlistEntity;
     } catch (error) {
-      //differencier error de repo et de spotify
+      //todo differencier error de repo et de spotify
       throw error;
     }
   }
