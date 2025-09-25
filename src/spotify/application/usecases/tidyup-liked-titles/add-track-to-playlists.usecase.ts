@@ -23,8 +23,7 @@ export class AddTrackToPlaylistUseCase {
     const { accessToken, playlistId, trackId, userId } = command;
 
     try {
-      const playlist =
-        await this.playlistRepository.findPlaylistById(playlistId);
+      const playlist = await this.playlistRepository.findById(playlistId);
 
       if (!playlist) {
         throw new Error('Playlist not found');

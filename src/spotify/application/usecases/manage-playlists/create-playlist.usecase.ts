@@ -32,7 +32,7 @@ export class CreatePlaylistUseCase {
       );
 
       const playlistEntity = Playlist.fromSpotifyPlaylist(spotifyPlaylist);
-      await this.playlistRepository.saveUserPlaylists(userId, [playlistEntity]);
+      await this.playlistRepository.save(playlistEntity);
 
       return playlistEntity;
     } catch (error) {

@@ -53,7 +53,7 @@ export class FullSyncSpotifyAccountUseCase {
       Playlist.fromSpotifyPlaylist(playlist),
     );
 
-    await this.playlistRepository.saveUserPlaylists(user.id, playlists);
+    await this.playlistRepository.saveMany(playlists);
     const playlistsCount = playlists.length;
 
     const spotifyLikedTracks =

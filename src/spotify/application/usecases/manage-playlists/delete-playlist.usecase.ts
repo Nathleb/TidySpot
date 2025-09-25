@@ -20,7 +20,7 @@ export class DeletePlaylistUseCase {
     try {
       await this.spotifyPlaylistClient.deletePlaylist(accessToken, playlistId);
 
-      await this.playlistRepository.deletePlaylist(playlistId);
+      await this.playlistRepository.deleteById(playlistId);
     } catch (error) {
       //differencier error de repo et de spotify
       throw error;

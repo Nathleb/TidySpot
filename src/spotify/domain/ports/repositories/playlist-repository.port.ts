@@ -1,11 +1,9 @@
 import { Playlist } from '../../entities/playlist.entity';
 
 export abstract class PlaylistRepositoryPort {
-  abstract saveUserPlaylists(
-    userId: string,
-    playlists: Playlist[],
-  ): Promise<void>;
-  abstract findUserPlaylists(userId: string): Promise<Playlist[]>;
-  abstract findPlaylistById(playlistId: string): Promise<Playlist | null>;
-  abstract deletePlaylist(playlistId: string): Promise<void>;
+  abstract save(playlist: Playlist): Promise<Playlist>;
+  abstract saveMany(playlists: Playlist[]): Promise<Playlist[]>;
+  abstract findAllByOwnerId(ownerId: string): Promise<Playlist[]>;
+  abstract findById(playlistId: string): Promise<Playlist | null>;
+  abstract deleteById(playlistId: string): Promise<void>;
 }
