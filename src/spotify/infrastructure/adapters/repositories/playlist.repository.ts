@@ -4,16 +4,12 @@ import { join } from 'path';
 import { Playlist } from 'src/spotify/domain/entities/playlist.entity';
 import { PlaylistRepositoryPort } from 'src/spotify/domain/ports/repositories/playlist-repository.port';
 
-interface UserPlaylistsData {
-  [userId: string]: Playlist[];
-}
-
 @Injectable()
 export class PlaylistRepository
   extends PlaylistRepositoryPort
   implements OnModuleInit
 {
-  private userPlaylists: UserPlaylistsData = {};
+  private playlists: Playlist[] = [];
   private readonly filePath = join(process.cwd(), 'data', 'playlists.json');
 
   async onModuleInit() {
@@ -26,11 +22,11 @@ export class PlaylistRepository
       await fs.mkdir(join(process.cwd(), 'data'), { recursive: true });
 
       const data = await fs.readFile(this.filePath, 'utf8');
-      this.userPlaylists = JSON.parse(data);
+      this.playlists = JSON.parse(data);
     } catch (error) {
       if (error.code === 'ENOENT') {
         // File doesn't exist, start with empty object
-        this.userPlaylists = {};
+        this.playlists = [];
         await this.persistPlaylists();
       } else {
         throw error;
@@ -39,48 +35,47 @@ export class PlaylistRepository
   }
 
   private async persistPlaylists(): Promise<void> {
-    await fs.writeFile(
-      this.filePath,
-      JSON.stringify(this.userPlaylists, null, 2),
-    );
+    await fs.writeFile(this.filePath, JSON.stringify(this.playlists, null, 2));
   }
 
-  async saveUserPlaylists(
-    userId: string,
-    playlists: Playlist[],
-  ): Promise<void> {
-    this.userPlaylists[userId] = playlists;
+  async save(playlist: Playlist): Promise<Playlist> {
+    const index = this.playlists.findIndex((p) => p.id === playlist.id);
+
+    if (index !== -1) {
+      this.playlists[index] = playlist;
+    } else {
+      this.playlists.push(playlist);
+    }
+
     await this.persistPlaylists();
+    return playlist;
   }
+  async saveMany(playlists: Playlist[]): Promise<Playlist[]> {
+    const playlistMap = new Map(this.playlists.map((p) => [p.id, p]));
 
-  async findUserPlaylists(userId: string): Promise<Playlist[]> {
-    return Promise.resolve(this.userPlaylists[userId] || []);
+    for (const playlist of playlists) {
+      playlistMap.set(playlist.id, playlist);
+    }
+
+    this.playlists = Array.from(playlistMap.values());
+
+    await this.persistPlaylists();
+    return playlists;
   }
-
-  async findPlaylistById(playlistId: string): Promise<Playlist | null> {
-    // Search through all users' playlists to find the playlist by ID
-    for (const playlists of Object.values(this.userPlaylists)) {
-      const playlist = playlists.find((p) => p.id === playlistId);
-      if (playlist) {
-        return Promise.resolve(playlist);
-      }
-    }
-    return Promise.resolve(null);
+  findAllByOwnerId(ownerId: string): Promise<Playlist[]> {
+    const userPlaylists = this.playlists.filter((p) => p.ownerId === ownerId);
+    return Promise.resolve(userPlaylists);
   }
-
-  async deletePlaylist(playlistId: string): Promise<void> {
-    let found = false;
-    for (const userId in this.userPlaylists) {
-      const playlists = this.userPlaylists[userId];
-      const index = playlists.findIndex((p) => p.id === playlistId);
-      if (index !== -1) {
-        playlists.splice(index, 1);
-        found = true;
-        break;
-      }
+  findById(playlistId: string): Promise<Playlist | null> {
+    const playlist = this.playlists.find((p) => p.id === playlistId);
+    return Promise.resolve(playlist || null);
+  }
+  deleteById(playlistId: string): Promise<void> {
+    const initialLength = this.playlists.length;
+    this.playlists = this.playlists.filter((p) => p.id !== playlistId);
+    if (this.playlists.length === initialLength) {
+      throw new Error(`Playlist with ID ${playlistId} not found.`);
     }
-    if (found) {
-      await this.persistPlaylists();
-    }
+    return this.persistPlaylists();
   }
 }

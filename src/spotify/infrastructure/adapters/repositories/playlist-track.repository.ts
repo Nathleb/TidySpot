@@ -48,15 +48,44 @@ export class PlaylistTrackRepository
     );
   }
 
-  async savePlaylistTracks(
+  replaceAllPlaylistTracks(
     playlistId: string,
     tracks: PlaylistTrack[],
   ): Promise<void> {
     this.playlistTracks[playlistId] = tracks;
-    await this.persistPlaylistTracks();
+    return this.persistPlaylistTracks();
   }
 
-  async findPlaylistTracks(playlistId: string): Promise<PlaylistTrack[]> {
+  addTrackToPlaylist(
+    playlistId: string,
+    playlistTrack: PlaylistTrack,
+  ): Promise<void> {
+    if (!this.playlistTracks[playlistId]) {
+      this.playlistTracks[playlistId] = [];
+    }
+    this.playlistTracks[playlistId].push(playlistTrack);
+    return this.persistPlaylistTracks();
+  }
+
+  getTracksByPlaylistId(playlistId: string): Promise<PlaylistTrack[]> {
     return Promise.resolve(this.playlistTracks[playlistId] || []);
+  }
+
+  findByPlaylistIdAndTrackId(
+    playlistId: string,
+    trackId: string,
+  ): Promise<PlaylistTrack | null> {
+    const tracks = this.playlistTracks[playlistId] || [];
+    const track = tracks.find((t) => t.trackId === trackId);
+    return Promise.resolve(track || null);
+  }
+
+  getTracksFromSortingPlaylistsByUserId(
+    userId: string,
+  ): Promise<PlaylistTrack[]> {
+    //genre un join sur l'id etc
+    const tracks: PlaylistTrack[] = [];
+
+    return Promise.resolve(tracks);
   }
 }

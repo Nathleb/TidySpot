@@ -13,6 +13,17 @@ export class LikedTrackRepository
   extends LikedTrackRepositoryPort
   implements OnModuleInit
 {
+  findUserLikedSongsNotInTrackIds(
+    userId: string,
+    excludeTrackIds: string[],
+    offset: number,
+    limit: number,
+  ): Promise<{ tracks: LikedTrack[]; totalCount: number }> {
+    throw new Error('Method not implemented.');
+  }
+  deleteLikedSong(userId: string, trackId: string): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
   private userLikedTracks: UserLikedTracksData = {};
   private readonly filePath = join(process.cwd(), 'data', 'liked-tracks.json');
 
