@@ -58,8 +58,8 @@ export class FullSyncSpotifyAccountUseCase {
 
     const spotifyLikedTracks =
       await this.spotifyTrackClient.getAllUserLikedTracks(accessToken);
-    const likedTracks = spotifyLikedTracks.map((savedTrack) =>
-      LikedTrack.fromSpotifyLikedTrack(savedTrack, user.id),
+    const likedTracks = spotifyLikedTracks.map((spotifyLikedTrack) =>
+      LikedTrack.fromSpotifyLikedTrack(spotifyLikedTrack, user.id),
     );
 
     await this.likedTrackRepository.saveUserLikedSongs(user.id, likedTracks);

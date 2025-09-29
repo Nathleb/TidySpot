@@ -3,14 +3,16 @@ Track to Uri table in db (application layer)?
 implement useCases
 
 -Synchronise profile (only playlist where i can write) strategy for syncing
--toggle a playlist for sorting
 
 
--get next tracks to sort (A(liked)∖B(taggedplaylist))
 -skip track
--add track to playlists
 -cancel last operation
 
 -suggestion???
+tests
 
-determiner ce qu'il reste a trier (que se passe-t-il lors de la sync)
+Error handling
+cache
+https://www.npmjs.com/package/spotify-preview-finder ??? sinc preview is deprecated
+
+DTO for user interaction. validators and pipes

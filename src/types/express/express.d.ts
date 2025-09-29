@@ -1,4 +1,5 @@
 import 'express';
+import { Request } from 'express';
 
 declare global {
   namespace Express {
@@ -9,7 +10,7 @@ declare global {
   }
 }
 
-export interface CustomRequest extends ExpressRequest {
+export interface CustomRequest extends Request {
   accessToken: string;
   spotifyId: string;
 }
